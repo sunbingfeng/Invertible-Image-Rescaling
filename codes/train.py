@@ -9,6 +9,8 @@ import torch.distributed as dist
 import torch.multiprocessing as mp
 from data.data_sampler import DistIterSampler
 
+import torchvision
+
 import options.options as option
 from utils import util
 from data import create_dataloader, create_dataset
@@ -144,6 +146,13 @@ def main():
         current_step = 0
         start_epoch = 0
 
+    images = next(iter(train_loader))['GT']
+    print(images)
+
+    grid = torchvision.utils.make_grid(images)
+    tb_logger.add_image('images', grid, 0)
+    tb_logger.add_graph(model.netG.module, images.cuda())
+
     #### training
     logger.info('Start training from epoch: {:d}, iter: {:d}'.format(start_epoch, current_step))
     for epoch in range(start_epoch, total_epochs + 1):
@@ -186,6 +195,11 @@ def main():
 
                     model.feed_data(val_data)
                     model.test()
+
+                    images = val_data['GT']
+                    grid = torchvision.utils.make_grid(images)
+                    tb_logger.add_image('images', grid, 0)
+                    tb_logger.add_graph(model.netG.module, images.cuda())
 
                     visuals = model.get_current_visuals()
                     sr_img = util.tensor2img(visuals['SR'])  # uint8

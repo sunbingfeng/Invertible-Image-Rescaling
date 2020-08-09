@@ -159,18 +159,23 @@ class IRNpModel(BaseModel):
 
         self.optimizer_G.zero_grad()
 
+        print('input shape: ', self.input.shape)
         self.input = self.real_H
         self.output = self.netG(x=self.input)
+        print('output shape: ', self.output.shape)
 
         loss = 0
         zshape = self.output[:, 3:, :, :].shape
+        print('z shape: ', zshape)
 
         LR = self.Quantization(self.output[:, :3, :, :])
 
         gaussian_scale = self.train_opt['gaussian_scale'] if self.train_opt['gaussian_scale'] != None else 1
         y_ = torch.cat((LR, gaussian_scale * self.gaussian_batch(zshape)), dim=1)
+        print('y_ shape: ', y_.shape)
 
         self.fake_H = self.netG(x=y_, rev=True)
+        print('fake_H shape: ', self.fake_H.shape)
 
         if step % self.D_update_ratio == 0 and step > self.D_init_iters:
             l_forw_fit = self.loss_forward(self.output, self.ref_L)
@@ -220,7 +225,9 @@ class IRNpModel(BaseModel):
         input_dim = Lshape[1]
         self.input = self.real_H
 
+        print('test mode==>input shape: ', self.input.shape)
         zshape = [Lshape[0], input_dim * (self.opt['scale']**2) - Lshape[1], Lshape[2], Lshape[3]]
+        print('test mode==>zshape: ', zshape)
 
         gaussian_scale = 1
         if self.test_opt and self.test_opt['gaussian_scale'] != None:
@@ -230,8 +237,11 @@ class IRNpModel(BaseModel):
         with torch.no_grad():
             self.forw_L = self.netG(x=self.input)[:, :3, :, :]
             self.forw_L = self.Quantization(self.forw_L)
+            print('test mode==>forw_L shape: ', self.forw_L.shape)
             y_forw = torch.cat((self.forw_L, gaussian_scale * self.gaussian_batch(zshape)), dim=1)
+            print('test mode==>y_forw shape: ', y_forw.shape)
             self.fake_H = self.netG(x=y_forw, rev=True)[:, :3, :, :]
+            print('test mode==>fake_H shape: ', y_forw.shape)
 
         self.netG.train()
 

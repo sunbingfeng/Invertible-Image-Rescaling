@@ -6,16 +6,16 @@ use_tb_logger: true
 model: IRN+
 distortion: sr
 scale: 4
-gpu_ids: [2]
+gpu_ids: [0]
 
 
 #### datasets
 
 datasets:
   train:
-    name: DIV2K
+    name: BSD200
     mode: LQGT
-    dataroot_GT: ~ # path to training HR images
+    dataroot_GT: /home/bill/Documents/03_datasets/BSDS200 # path to training HR images
     dataroot_LQ: ~ # path to training reference LR images, not necessary, if not provided, LR images will be generated in dataloader
 
     use_shuffle: true
@@ -25,11 +25,10 @@ datasets:
     use_flip: true
     use_rot: true
     color: RGB
-
   val:
-    name: val_DIV2K
+    name: set5
     mode: LQGT
-    dataroot_GT: ~ # path to validation HR images
+    dataroot_GT: /home/bill/Documents/03_datasets/Set5 # path to training HR images
     dataroot_LQ: ~ # path to validation reference LR images, not necessary, if not provided, LR images will be generated in dataloader
 
 
@@ -51,12 +50,10 @@ network_D:
 
 
 #### path
-
 path:
-  pretrain_model_G: ../experiments/pretrained_models/IRN_x4.pth
+  pretrain_model_G: 
   strict_load: true
   resume_state: ~
-
 
 #### training settings: learning rate scheme, loss
 

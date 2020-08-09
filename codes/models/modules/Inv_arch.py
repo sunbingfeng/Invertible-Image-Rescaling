@@ -66,7 +66,9 @@ class HaarDownsampling(nn.Module):
             self.elements = x.shape[1] * x.shape[2] * x.shape[3]
             self.last_jac = self.elements / 4 * np.log(1/16.)
 
+            # print('HaarDownsampling==>channel_in: ', self.channel_in, ', x shape: ', x.shape, ', and haar_weights: ', self.haar_weights.shape)
             out = F.conv2d(x, self.haar_weights, bias=None, stride=2, groups=self.channel_in) / 4.0
+            # print('HaarDownsampling==>out: ')
             out = out.reshape([x.shape[0], self.channel_in, 4, x.shape[2] // 2, x.shape[3] // 2])
             out = torch.transpose(out, 1, 2)
             out = out.reshape([x.shape[0], self.channel_in * 4, x.shape[2] // 2, x.shape[3] // 2])
